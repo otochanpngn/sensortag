@@ -1,11 +1,11 @@
-var util = require('../../node_modules/util');
+var util = require('../../../node_modules/util');
 
-var async = require('../../node_modules/async');
+var async = require('../../../node_modules/async');
 
-var SensorTag = require('../../node_modules/sensortag/index');
+var SensorTag = require('../../../node_modules/sensortag/index');
 
 var fs = require('fs');
-require('../../node_modules/date-utils');
+require('../../../node_modules/date-utils');
 
 var USE_READ = true;
 
@@ -26,7 +26,7 @@ fs.appendFile("68:c9:0b:00:00:05:21:81.csv", formatted + "," + "加速度x,加�
 fs.appendFile("c4:be:84:00:00:72:5a:0a.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,\n");
 fs.appendFile("c4:be:84:00:00:72:8d:0e.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,\n");
 
-SensorTag.discoverById("04dab04b3644433a8347889fd4f3a73a", function(sensorTag) {
+SensorTag.discoverAll(function(sensorTag) {
   console.log('discovered: ' + sensorTag);
 
   sensorTag.on('disconnect', function() {

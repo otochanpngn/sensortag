@@ -10,6 +10,8 @@ require('../../node_modules/date-utils');
 
 var USE_READ = true;
 
+var sensorTagList = [];
+
 var fileName = "test/"
 
 /*
@@ -26,14 +28,21 @@ var sensortag_id = ["c4:be:84:00:00:72:8d:0e",
 var dt = new Date();
 var formatted = dt.toFormat("YYYY/MM/DD/HH24:MI:SS:") + moment().milliseconds();
 console.log(formatted);
-//fs.appendFile("c4:be:84:00:00:72:8d:0e.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
-fs.appendFile(fileName + "c4:be:84:00:00:72:5a:0a.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
-fs.appendFile(fileName + "c4:be:84:00:00:72:63:8e.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
-fs.appendFile(fileName + "c4:be:84:00:00:70:c9:84.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
-fs.appendFile(fileName + "a0:e6:f8:00:00:af:61:81.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
-fs.appendFile(fileName + "b0:b4:48:00:00:ed:81:06.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
+fs.appendFile(fileName + "c4:be:84:00:00:72:8d:0e.csv", formatted + "," + "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z,\n");
+//fs.appendFile(fileName + "c4:be:84:00:00:72:5a:0a.csv", formatted + "," + "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z,\n");
+fs.appendFile(fileName + "c4:be:84:00:00:72:63:8e.csv", formatted + "," + "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z,\n");
+fs.appendFile(fileName + "c4:be:84:00:00:70:c9:84.csv", formatted + "," + "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z,\n");
+fs.appendFile(fileName + "a0:e6:f8:00:00:af:61:81.csv", formatted + "," + "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z,\n");
+fs.appendFile(fileName + "b0:b4:48:00:00:ed:81:06.csv", formatted + "," + "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z,\n");
 //fs.appendFile("68:c9:0b:00:00:05:21:81.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
 fs.appendFile(fileName + "a0:e6:f8:00:00:af:69:84.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
+fs.appendFile(fileName + "test.csv", formatted + "," + "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z," +
+                                                      "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z," +
+                                                      "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z," +
+                                                      "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z," +
+                                                      "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z," +
+                                                      "acc_x,acc_y,acc_z,gyr_x,gyr_y,gyr_z,mag_x,mag_y,mag_z," +
+                                                      "\n");
 
 /*
 fs.appendFile("c4:be:84:00:00:72:8d:0e.csv", formatted + "," + "加速度x,加速度y,加速度z,ジャイロx,ジャイロy,ジャイロz,磁気x,磁気y,磁気z,\n");
@@ -47,6 +56,7 @@ fs.appendFile("a0:e6:f8:00:00:af:69:84.csv", formatted + "," + "加速度x,加�
 */
 
 var device_timers = {}; // NOTE: Storage for setinterval objects
+var sensorTagList = {};
 
 var onDiscover = function(sensorTag) {
 	sensorTag.once('disconnect', function() {
@@ -80,9 +90,9 @@ var onDiscover = function(sensorTag) {
 				async.parallel({
 					Info: function(next) {
 						var info = {id: sensorTag.id, type: sensorTag.type};
-						sensorTag._peripheral.updateRssi(function(error, rssi) {
-							info.rssi = rssi;
-						});
+						//sensorTag._peripheral.updateRssi(function(error, rssi) {
+						//	info.rssi = rssi;
+						//});
 						next(null, info);
 					},
 					Accelerometer: function(next) {
@@ -103,8 +113,83 @@ var onDiscover = function(sensorTag) {
 				}, function(err, data) {
 					//console.log(JSON.stringify(data));
           console.log(data.Info.id);
+
+          sensorTagList["uuid_" + data.Info.id] = data;
+          //console.log(sensorTagList);
+          console.log(Object.keys(sensorTagList).length);
+
           dt = new Date();
           formatted = dt.toFormat("YYYY/MM/DD/HH24:MI:SS:") + moment().milliseconds();
+
+          if(Object.keys(sensorTagList).length == 6){
+            fs.appendFile(fileName + "test.csv",
+
+                            formatted + "," +
+
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Accelerometer.acc_x + "," +
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Accelerometer.acc_y + "," +
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Accelerometer.acc_z + "," +
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Gyroscope.gyr_x + "," +
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Gyroscope.gyr_y + "," +
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Gyroscope.gyr_z + "," +
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Magnetometer.mag_x + "," +
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Magnetometer.mag_y + "," +
+                            sensorTagList.uuid_96060e34f07e4cf8a1cbed35bee42392.Magnetometer.mag_z + "," +
+
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Accelerometer.acc_x + "," +
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Accelerometer.acc_y + "," +
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Accelerometer.acc_z + "," +
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Gyroscope.gyr_x + "," +
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Gyroscope.gyr_y + "," +
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Gyroscope.gyr_z + "," +
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Magnetometer.mag_x + "," +
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Magnetometer.mag_y + "," +
+                            sensorTagList.uuid_33b6c573fe564c6298165a91b25ad96c.Magnetometer.mag_z + "," +
+
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Accelerometer.acc_x + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Accelerometer.acc_y + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Accelerometer.acc_z + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Gyroscope.gyr_x + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Gyroscope.gyr_y + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Gyroscope.gyr_z + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Magnetometer.mag_x + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Magnetometer.mag_y + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Magnetometer.mag_z + "," +
+
+                            sensorTagList.uuid_9c7da4ad48b346b3933efbe1f961c8a8.Accelerometer.acc_x + "," +
+                            sensorTagList.uuid_9c7da4ad48b346b3933efbe1f961c8a8.Accelerometer.acc_y + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Accelerometer.acc_z + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Gyroscope.gyr_x + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Gyroscope.gyr_y + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Gyroscope.gyr_z + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Magnetometer.mag_x + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Magnetometer.mag_y + "," +
+                            sensorTagList.uuid_bcca022a5f7a4264b3984ceb3311cca0.Magnetometer.mag_z + "," +
+
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Accelerometer.acc_x + "," +
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Accelerometer.acc_y + "," +
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Accelerometer.acc_z + "," +
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Gyroscope.gyr_x + "," +
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Gyroscope.gyr_y + "," +
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Gyroscope.gyr_z + "," +
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Magnetometer.mag_x + "," +
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Magnetometer.mag_y + "," +
+                            sensorTagList.uuid_298fa783bbd144f6946c627f0cfad536.Magnetometer.mag_z + "," +
+
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Accelerometer.acc_x + "," +
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Accelerometer.acc_y + "," +
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Accelerometer.acc_z + "," +
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Gyroscope.gyr_x + "," +
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Gyroscope.gyr_y + "," +
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Gyroscope.gyr_z + "," +
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Magnetometer.mag_x + "," +
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Magnetometer.mag_y + "," +
+                            sensorTagList.uuid_04dab04b3644433a8347889fd4f3a73a.Magnetometer.mag_z + "," +
+
+                            "\n");
+            sensorTagList = {};
+          }
+
           if(data.Info.id == "d7dd6df38066447c85721aa1150fce03"){
             fs.appendFile(fileName + "68:c9:0b:00:00:05:21:81.csv",
                             formatted + "," +
